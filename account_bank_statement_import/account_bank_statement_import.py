@@ -40,7 +40,7 @@ class AccountBankStatementImport(models.TransientModel):
         'importing. It has be be manually chosen for statement formats which '
         'doesn\'t allow automatic journal detection (QIF for example).')
     hide_journal_field = fields.Boolean(
-        'Hide the journal field in the view', default=_get_hide_journal_field)
+        'Hide the journal field in the view', compute='_get_hide_journal_field')
     data_file = fields.Binary(
         'Bank Statement File', required=True,
         help='Get you bank statements in electronic format from your bank '
@@ -172,8 +172,8 @@ class AccountBankStatementImport(models.TransientModel):
     def _get_journal(self, currency_id, bank_account_id, account_number):
         """ Find the journal """
         bank_model = self.env['res.partner.bank']
-        # Find the journal from wizard or bank account
-        journal_id = self.journal_id.id
+        # Find the journal from context, wizard or bank account
+        journal_id = self.env.context.get('journal_id') or self.journal_id.id
         if bank_account_id:
             bank_account = bank_model.browse(bank_account_id)
             if journal_id:
